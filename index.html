@@ -88,6 +88,7 @@
 let level=0,round=0,stars=0,badges=0,locked=false,soundOn=true;
 let speechOn=true;
 let currentChoiceNames=[];
+let currentForecastNarration='';
 let preferredVoice=null;
 
 function chooseFriendlyVoice(){
@@ -135,10 +136,11 @@ function speak(text){
 
 function speakQuestion(){
   const questionText=prompt.textContent.trim();
+  const intro=currentForecastNarration ? [currentForecastNarration,questionText] : [questionText];
   if(currentChoiceNames.length){
-    speakSequence([questionText,'Your choices are.'].concat(currentChoiceNames),700);
+    speakSequence(intro.concat(['Your choices are.']).concat(currentChoiceNames),700);
   }else{
-    speak(questionText);
+    speakSequence(intro,700);
   }
 }
 
@@ -261,7 +263,8 @@ function lesson(t){game.innerHTML=`<div class="lesson">${t}</div>`}function grid
  // This prevents the answer narration from cancelling the last words of the question.
  setTimeout(()=>{
    const questionText=prompt.textContent.trim();
-   const narration=[questionText,'Your choices are.'].concat(currentChoiceNames);
+   const intro=currentForecastNarration ? [currentForecastNarration,questionText] : [questionText];
+   const narration=intro.concat(['Your choices are.']).concat(currentChoiceNames);
    speakSequence(narration,700);
  },350);
 }function pick(el,ok,f){if(locked)return;if(ok){locked=true;el.classList.add('correct');stars++;feedback.textContent='Correct! ⭐';speak('That is correct. Great job!');fact.textContent=f;fact.style.display='block';tone(760);setTimeout(()=>{
@@ -282,10 +285,34 @@ const Q=[
 ()=>{lessonTitle.textContent='Precipitation Detective';lesson('<b>Precipitation</b> is water that falls from clouds.');let s=[['Which is liquid precipitation?','rain','Rain is liquid water.',[{v:'rain',l:'Rain',e:'🌧️'},{v:'snow',l:'Snow',e:'❄️'},{v:'hail',l:'Hail',e:'🧊'},{v:'fog',l:'Fog',e:'🌫️'}]],['Which is made of ice crystals?','snow','Snowflakes are ice crystals.',[{v:'snow',l:'Snow',e:'🌨️'},{v:'rain',l:'Rain',e:'🌧️'},{v:'fog',l:'Fog',e:'🌫️'},{v:'dew',l:'Dew',e:'💧'}]],['Which can fall as lumps of ice?','hail','Hail grows inside strong thunderstorm clouds.',[{v:'hail',l:'Hail',e:'🧊'},{v:'rain',l:'Rain',e:'🌧️'},{v:'fog',l:'Fog',e:'🌫️'},{v:'sun',l:'Sunshine',e:'☀️'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
 ()=>{lessonTitle.textContent='Meteorologist Tools';lesson('Meteorologists use instruments to <b>measure the atmosphere</b>.');let s=[['Which tool measures rainfall?','g','A rain gauge collects and measures rain.',[{v:'g',l:'Rain gauge',e:'🪣'},{v:'t',l:'Thermometer',e:'🌡️'},{v:'v',l:'Wind vane',e:'🧭'},{v:'r',l:'Ruler',e:'📏'}]],['Which tool shows wind direction?','v','A wind vane shows wind direction.',[{v:'v',l:'Wind vane',e:'🧭'},{v:'g',l:'Rain gauge',e:'🪣'},{v:'t',l:'Thermometer',e:'🌡️'},{v:'c',l:'Clock',e:'🕒'}]],['Which tool measures wind speed?','a','An anemometer measures wind speed.',[{v:'a',l:'Anemometer',e:'🎡'},{v:'t',l:'Thermometer',e:'🌡️'},{v:'g',l:'Rain gauge',e:'🪣'},{v:'r',l:'Ruler',e:'📏'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
 ()=>{lessonTitle.textContent='Water Cycle Lab';lesson('Water moves through <b>evaporation → condensation → precipitation → collection</b>.');let s=[['The Sun warms a puddle. What happens next?','e','Evaporation changes liquid water into water vapor.',[{v:'e',l:'Evaporation',e:'💧⬆️'},{v:'f',l:'Freezing',e:'🧊'},{v:'s',l:'Snowfall',e:'🌨️'},{v:'w',l:'Wind',e:'💨'}]],['Water vapor cools and forms clouds. What is this?','c','Condensation forms tiny liquid droplets.',[{v:'c',l:'Condensation',e:'☁️'},{v:'e',l:'Evaporation',e:'💧⬆️'},{v:'m',l:'Melting',e:'🧊➡️💧'},{v:'h',l:'Heating',e:'🔥'}]],['Cloud droplets grow heavy and fall. What is this?','p','Precipitation is water falling from clouds.',[{v:'p',l:'Precipitation',e:'🌧️'},{v:'c',l:'Collection',e:'🏞️'},{v:'e',l:'Evaporation',e:'☀️💧'},{v:'w',l:'Wind',e:'💨'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
-()=>{lessonTitle.textContent='Forecast Reader';lesson('A <b>forecast</b> predicts what weather may happen next.');let s=[['<b>Tomorrow:</b> 62°F • Rain chance: 80%','What weather is most likely?','rain','An 80% rain chance means rain is much more likely.',[{v:'rain',l:'Rain',e:'🌧️'},{v:'snow',l:'Snow',e:'🌨️'},{v:'sun',l:'Sunny',e:'☀️'},{v:'hot',l:'Very hot',e:'🔥'}]],['<b>Afternoon:</b> 91°F • Rain chance: 5%','Which description fits best?','hot','91°F is hot, and rain is unlikely at 5%.',[{v:'hot',l:'Hot & mostly dry',e:'☀️'},{v:'snow',l:'Cold & snowy',e:'❄️'},{v:'storm',l:'Stormy',e:'⛈️'},{v:'freeze',l:'Freezing',e:'🧊'}]],['<b>Morning:</b> 55°F • Wind: 25 mph','What should you notice most?','wind','25 mph means it will feel noticeably windy.',[{v:'wind',l:'It will be windy',e:'💨'},{v:'snow',l:'Heavy snow',e:'🌨️'},{v:'heat',l:'Extreme heat',e:'🔥'},{v:'calm',l:'No wind',e:'🍃'}]]][round];prompt.textContent=s[1];game.innerHTML=`<div class="lesson">A forecast uses observations and models to predict weather.</div><div class="forecast">${s[0]}</div>`;grid(s[4],s[2],s[3])},
+()=>{lessonTitle.textContent='Forecast Reader';
+lesson('A <b>forecast</b> uses weather observations and computer models to predict what may happen next.');
+const sets=[
+ {forecast:'Tomorrow. Temperature 62 degrees Fahrenheit. Chance of rain 80 percent.',
+  card:'<div class="big">🌧️</div><b>Tomorrow:</b> 62°F &nbsp; • &nbsp; Rain chance: 80%',
+  ask:'What weather is most likely?',ans:'rain',
+  fact:'An 80 percent rain chance means rain is much more likely than a dry day.',
+  opts:[{v:'rain',l:'Rain',e:'🌧️'},{v:'snow',l:'Snow',e:'🌨️'},{v:'sun',l:'Sunny',e:'☀️'},{v:'hot',l:'Very hot',e:'🔥'}]},
+ {forecast:'This afternoon. Temperature 91 degrees Fahrenheit. Chance of rain 5 percent.',
+  card:'<div class="big">☀️</div><b>Afternoon:</b> 91°F &nbsp; • &nbsp; Rain chance: 5%',
+  ask:'Which description fits best?',ans:'hotdry',
+  fact:'91 degrees is hot, and a 5 percent rain chance means rain is unlikely.',
+  opts:[{v:'hotdry',l:'Hot and mostly dry',e:'☀️'},{v:'snow',l:'Cold and snowy',e:'❄️'},{v:'storm',l:'Stormy',e:'⛈️'},{v:'freeze',l:'Freezing',e:'🧊'}]},
+ {forecast:'This morning. Temperature 55 degrees Fahrenheit. Wind speed 25 miles per hour.',
+  card:'<div class="big">💨</div><b>Morning:</b> 55°F &nbsp; • &nbsp; Wind: 25 mph',
+  ask:'What should you notice most?',ans:'windy',
+  fact:'25 mile per hour wind is noticeably windy, even when the temperature is mild.',
+  opts:[{v:'windy',l:'It will be windy',e:'💨'},{v:'snow',l:'Heavy snow',e:'🌨️'},{v:'heat',l:'Extreme heat',e:'🔥'},{v:'calm',l:'No wind',e:'🍃'}]}
+];
+const s=sets[round];
+card(s.card);
+prompt.textContent=s.ask;
+currentForecastNarration=s.forecast;
+grid(s.opts,s.ans,s.fact)
+}{v:'snow',l:'Snow',e:'🌨️'},{v:'sun',l:'Sunny',e:'☀️'},{v:'hot',l:'Very hot',e:'🔥'}]],['<b>Afternoon:</b> 91°F • Rain chance: 5%','Which description fits best?','hot','91°F is hot, and rain is unlikely at 5%.',[{v:'hot',l:'Hot & mostly dry',e:'☀️'},{v:'snow',l:'Cold & snowy',e:'❄️'},{v:'storm',l:'Stormy',e:'⛈️'},{v:'freeze',l:'Freezing',e:'🧊'}]],['<b>Morning:</b> 55°F • Wind: 25 mph','What should you notice most?','wind','25 mph means it will feel noticeably windy.',[{v:'wind',l:'It will be windy',e:'💨'},{v:'snow',l:'Heavy snow',e:'🌨️'},{v:'heat',l:'Extreme heat',e:'🔥'},{v:'calm',l:'No wind',e:'🍃'}]]][round];prompt.textContent=s[1];game.innerHTML=`<div class="lesson">A forecast uses observations and models to predict weather.</div><div class="forecast">${s[0]}</div>`;grid(s[4],s[2],s[3])},
 ()=>{lessonTitle.textContent='Weather Safety Challenge';lesson('Weather science helps us make <b>safe choices</b>.');let s=[['You hear thunder outside. What is safest?','in','Thunder means lightning is close enough to be dangerous. Go indoors.',[{v:'in',l:'Go indoors',e:'🏠'},{v:'tree',l:'Stand under a tree',e:'🌳'},{v:'field',l:'Stay in a field',e:'🏃'},{v:'swim',l:'Go swimming',e:'🏊'}]],['A tornado warning is issued. Where should you go?','safe','Use a sturdy building and a small interior room on the lowest level.',[{v:'safe',l:'Interior room downstairs',e:'🏠'},{v:'window',l:'Next to a window',e:'🪟'},{v:'outside',l:'Outside to watch',e:'👀'},{v:'yard',l:'Stand in the yard',e:'🌳'}]],['It is extremely hot outside. What is smart?','water','Drink water and take breaks in shade or air conditioning.',[{v:'water',l:'Drink water & cool down',e:'💧'},{v:'coat',l:'Wear a heavy coat',e:'🧥'},{v:'run',l:'Run hard at noon',e:'🏃'},{v:'ignore',l:'Ignore overheating',e:'🙈'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])}
 ];
-function render(){locked=false;currentChoiceNames=[];game.innerHTML='';feedback.textContent='';fact.style.display='none';top();if(level>=8){$('fill').style.width='100%';lessonTitle.textContent='Junior Meteorologist';prompt.textContent='Weather Adventure Complete!';game.innerHTML=`<div class="finish"><div class="hero">🏆🌦️</div><h2>You did it!</h2><div class="cert"><h3>Junior Meteorologist Certificate</h3><p>You completed all 8 Weather Lab levels.</p><p><b>${stars} stars • ${badges} badges</b></p><p>You learned weather types, temperature, precipitation, instruments, the water cycle, forecasts, and safety.</p></div><button onclick="location.reload()">Play Again</button></div>`;feedback.textContent='Excellent weather science!';speak('Excellent weather science! You are a junior meteorologist!');return}Q[level]()}
+function render(){locked=false;currentChoiceNames=[];currentForecastNarration='';game.innerHTML='';feedback.textContent='';fact.style.display='none';top();if(level>=8){$('fill').style.width='100%';lessonTitle.textContent='Junior Meteorologist';prompt.textContent='Weather Adventure Complete!';game.innerHTML=`<div class="finish"><div class="hero">🏆🌦️</div><h2>You did it!</h2><div class="cert"><h3>Junior Meteorologist Certificate</h3><p>You completed all 8 Weather Lab levels.</p><p><b>${stars} stars • ${badges} badges</b></p><p>You learned weather types, temperature, precipitation, instruments, the water cycle, forecasts, and safety.</p></div><button onclick="location.reload()">Play Again</button></div>`;feedback.textContent='Excellent weather science!';speak('Excellent weather science! You are a junior meteorologist!');return}Q[level]()}
 $('restartBtn').onclick=()=>{round=0;locked=false;saveProgress();render()};
 $('soundBtn').onclick=()=>{
   soundOn=!soundOn;
