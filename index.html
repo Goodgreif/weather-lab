@@ -1,340 +1,514 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Little Builders – Weather Lab Adventure</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#cfefff">
+<title>Little Builders – Weather Lab</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;background:linear-gradient(#bde9ff,#f7fbff 70%,#e5f5d5);color:#17324d;min-height:100vh}.app{max-width:980px;margin:auto;padding:16px}.card{background:#fff;border-radius:24px;box-shadow:0 8px 24px #0002;padding:18px;margin-bottom:14px}header{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{margin:0;font-size:clamp(26px,5vw,42px)}.sub{opacity:.75}.score{font-weight:900;font-size:22px}.badge{display:inline-block;padding:6px 11px;border-radius:999px;background:#e7f6ff;font-weight:800}.progress{height:14px;background:#e8edf1;border-radius:20px;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#56baf5,#65d687);transition:.3s}.map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.map div{font-size:12px;padding:7px;text-align:center;border-radius:10px;background:#edf1f5;font-weight:800}.map .done{background:#daf7df}.map .current{background:#d9efff;outline:2px solid #4baee8}#lessonTitle{text-align:center;font-weight:900;color:#28709d;font-size:20px}#prompt{text-align:center;font-weight:900;font-size:clamp(23px,4vw,34px);margin:8px 0 14px}.lesson,.fact{padding:13px;border-radius:17px;text-align:center;font-weight:700}.lesson{background:#edf9ff;margin-bottom:14px}.fact{background:#fff5c8;margin-top:10px;display:none}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}@media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}.choice{min-height:128px;border:4px solid #17324d18;border-radius:22px;background:white;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;font-weight:900;font-size:clamp(17px,3vw,24px);text-align:center;cursor:pointer;padding:8px;box-shadow:0 5px 13px #0001}.emoji{font-size:clamp(48px,9vw,76px)}.correct{animation:pop .35s}.wrong{animation:shake .28s}@keyframes pop{50%{transform:scale(1.08)}}@keyframes shake{25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}.feedback{text-align:center;min-height:40px;font-weight:900;font-size:23px;margin-top:10px}.controls{text-align:center}.controls button,.finish button{border:0;border-radius:999px;padding:13px 22px;margin:5px;font-size:17px;font-weight:900;background:#17324d;color:white}.secondary{background:white!important;color:#17324d!important;border:3px solid #17324d!important}.forecast{background:#f4fbff;border:3px solid #b7e4fb;padding:14px;border-radius:18px;text-align:center;font-size:20px;margin-bottom:14px}.finish{text-align:center}.hero{font-size:85px}.cert{max-width:620px;margin:14px auto;padding:16px;border:4px dashed #e7bc43;border-radius:18px;background:#fff8d9}
-
-.levelPickerOverlay{
-  position:fixed;inset:0;background:rgba(10,30,45,.62);display:none;
-  align-items:center;justify-content:center;padding:18px;z-index:9999
+:root{
+  --ink:#17324d; --card:#ffffff; --blue:#dff4ff; --yellow:#ffd85a;
+  --shadow:0 10px 30px rgba(0,0,0,.12); --radius:24px;
 }
-.levelPickerOverlay.show{display:flex}
-.levelPicker{
-  width:min(760px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:26px;
-  box-shadow:0 18px 50px rgba(0,0,0,.25);padding:20px
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--ink);
+  min-height:100vh;
+  background:linear-gradient(#bfe8ff 0 42%,#f7fcff 42% 74%,#e7f6d8 74%);
 }
-.levelPicker h2{margin:0 0 6px;text-align:center;font-size:clamp(26px,5vw,38px)}
-.levelPicker p{text-align:center;margin:0 0 16px;opacity:.75;font-weight:700}
+.app{width:min(1020px,100%);margin:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.card{
+  background:rgba(255,255,255,.96);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+header{
+  padding:16px 18px;
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+}
+h1{margin:4px 0;font-size:clamp(25px,5vw,42px)}
+.sub{font-size:clamp(14px,2.8vw,18px);opacity:.8}
+.badge{display:inline-block;background:#e7f7ff;padding:6px 12px;border-radius:999px;font-weight:900}
+.headerActions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chooseTop{
+  background:var(--yellow);color:var(--ink);border:4px solid var(--ink);
+  border-radius:18px;padding:13px 18px;font-size:18px;font-weight:1000;cursor:pointer;
+  box-shadow:0 6px 0 rgba(23,50,77,.15)
+}
+.score{font-size:22px;font-weight:900}
+.progressBox{padding:12px 16px}
+.progressLabels{display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:6px}
+.progress{height:14px;background:#e7edf2;border-radius:999px;overflow:hidden}
+.progressFill{height:100%;width:0;background:linear-gradient(90deg,#55baff,#61d88b);transition:width .3s}
+.levelMap{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}
+.levelMap div{padding:7px 3px;background:#eef2f5;border-radius:11px;text-align:center;font-size:12px;font-weight:800}
+.levelMap .done{background:#dcf7df}.levelMap .current{background:#dff3ff;outline:2px solid #4daee6}
+.panel{padding:18px}
+#lessonTitle{text-align:center;color:#2675a5;font-weight:900;font-size:clamp(17px,3vw,21px)}
+#prompt{text-align:center;font-size:clamp(23px,4.5vw,34px);font-weight:1000;margin:8px 0 14px}
+.lesson,.forecastCard{
+  border-radius:18px;padding:13px 16px;text-align:center;margin-bottom:14px;
+  font-size:clamp(16px,3vw,20px);font-weight:700;line-height:1.35
+}
+.lesson{background:#edf9ff}
+.forecastCard{background:#fff8d7;border:3px solid #f1d568}
+.forecastCard .big{font-size:52px;margin-bottom:4px}
+#game{min-height:300px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:14px}
+@media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
+.choice{
+  min-height:132px;border:4px solid rgba(23,50,77,.1);border-radius:22px;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  font-size:clamp(18px,3.3vw,26px);font-weight:900;text-align:center;padding:10px;cursor:pointer;
+  box-shadow:0 6px 14px rgba(0,0,0,.07)
+}
+.choice .emoji{font-size:clamp(48px,9vw,76px);line-height:1}
+.choice:active{transform:scale(.98)}
+.choice.correct{animation:pop .35s}.choice.wrong{animation:shake .3s}
+@keyframes pop{50%{transform:scale(1.07)}}@keyframes shake{25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+.feedback{min-height:44px;text-align:center;font-size:clamp(19px,3.5vw,28px);font-weight:900;margin-top:10px}
+.fact{display:none;background:#fff5c7;border-radius:16px;padding:11px;text-align:center;font-weight:800;margin-top:8px}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+button.ctrl{
+  border:0;border-radius:999px;padding:13px 20px;font-size:17px;font-weight:900;cursor:pointer;
+  background:#17324d;color:#fff
+}
+button.ctrl.secondary{background:#fff;color:#17324d;border:3px solid #17324d}
+.status{text-align:center;font-size:13px;font-weight:800;opacity:.72;margin-top:4px}
+.finish{text-align:center;padding:22px}.finish .hero{font-size:86px}
+.cert{max-width:650px;margin:14px auto;background:#fff8d9;border:4px dashed #edc24c;border-radius:20px;padding:17px}
+.overlay{
+  position:fixed;inset:0;background:rgba(10,30,45,.65);display:none;align-items:center;justify-content:center;
+  padding:18px;z-index:9999
+}
+.overlay.show{display:flex}
+.picker{
+  width:min(800px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:26px;padding:20px;
+  box-shadow:0 18px 50px rgba(0,0,0,.3)
+}
+.picker h2{text-align:center;margin:0 0 6px}.picker p{text-align:center;margin:0 0 15px;font-weight:700;opacity:.75}
 .levelGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:680px){.levelGrid{grid-template-columns:repeat(4,1fr)}}
 .levelJump{
-  border:3px solid #cde9f8;background:#f8fdff;color:#17324d;border-radius:18px;
-  padding:14px 10px;min-height:110px;font-weight:900;cursor:pointer;text-align:center;
-  display:flex;flex-direction:column;justify-content:center;gap:5px
+  min-height:112px;border:3px solid #cce8f7;background:#f8fdff;color:#17324d;border-radius:18px;
+  padding:12px 8px;font-weight:900;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px
 }
-.levelJump span{font-size:30px}
-.levelJump small{font-size:13px;opacity:.75}
-.closePicker{width:100%;margin-top:14px}
-
-
-.saveStatus{
-  text-align:center;font-size:13px;font-weight:800;opacity:.72;margin-top:2px
-}
-.levelJump.completed{
-  background:#e7f8e9;border-color:#79cf8b;
-}
-.levelJump.completed small::after{
-  content:" • Completed";
-  font-weight:900;
-}
-
-
-.headerActions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.bigLevelButton{
-  background:#ffcf4a !important;color:#17324d !important;border:4px solid #17324d !important;
-  padding:14px 20px !important;font-size:18px !important;box-shadow:0 7px 0 rgba(23,50,77,.18) !important
-}
+.levelJump span{font-size:31px}.levelJump small{font-size:12px;opacity:.75}.levelJump.completed{background:#e7f8e9;border-color:#7ad08b}
+.picker button.close{width:100%;margin-top:12px}
 @media(max-width:620px){
-  header{align-items:stretch}
-  .headerActions{width:100%;justify-content:space-between}
-  .bigLevelButton{flex:1;min-width:190px}
+  header{align-items:stretch}.headerActions{width:100%;justify-content:space-between}.chooseTop{flex:1}
 }
-
-.choice .small{font-size:12px;font-weight:700;opacity:.62;margin-top:3px}
 </style>
-</head><body><div class="app">
-<div class="card"><header>
-<div><span id="levelBadge" class="badge">Level 1 of 8</span><h1>🌦️ Little Builders – Weather Lab</h1><div class="sub">Grow from Weather Explorer to Junior Meteorologist!</div></div>
-<div class="headerActions">
-  <button id="chooseLevelBtnTop" class="bigLevelButton">🗺️ CHOOSE LEVEL</button>
-  <div class="score">⭐ <span id="stars">0</span> &nbsp; 🏅 <span id="badges">0</span></div>
-</div>
-</header></div>
-<div class="card"><div class="progress"><div id="fill" class="fill"></div></div><div id="map" class="map"></div></div>
-<div class="card"><div id="lessonTitle"></div><div id="prompt"></div><div id="game"></div><div id="feedback" class="feedback"></div><div id="fact" class="fact"></div></div>
-<div class="controls">
-  <button id="soundBtn" class="secondary">🔊 Sound On</button>
-  <button id="readQuestionBtn" class="secondary">🗣️ Repeat Question & Choices</button>
-  <button id="chooseLevelBtn" class="secondary">🗺️ Choose Level</button>
-  <button id="restartBtn">↻ Restart This Level</button>
-</div>
-<div id="saveStatus" class="saveStatus">💾 Progress saves automatically • Full question is read before the answer choices</div>
+</head>
+<body>
+<div class="app">
+
+<div class="card">
+<header>
+  <div>
+    <span class="badge" id="levelBadge">Level 1 of 8</span>
+    <h1>🌦️ Little Builders – Weather Lab</h1>
+    <div class="sub">Grow from Weather Explorer to Junior Meteorologist!</div>
+  </div>
+  <div class="headerActions">
+    <button id="chooseLevelBtnTop" class="chooseTop">🗺️ CHOOSE LEVEL</button>
+    <div class="score">⭐ <span id="stars">0</span> &nbsp; 🏅 <span id="badges">0</span></div>
+  </div>
+</header>
 </div>
 
-<div id="levelPickerOverlay" class="levelPickerOverlay" aria-hidden="true">
-  <div class="levelPicker">
+<div class="card progressBox">
+  <div class="progressLabels"><span>Weather Explorer</span><span>Junior Meteorologist</span></div>
+  <div class="progress"><div id="progressFill" class="progressFill"></div></div>
+  <div id="levelMap" class="levelMap"></div>
+</div>
+
+<div class="card panel">
+  <div id="lessonTitle"></div>
+  <div id="prompt"></div>
+  <div id="game"></div>
+  <div id="feedback" class="feedback"></div>
+  <div id="fact" class="fact"></div>
+</div>
+
+<div class="controls">
+  <button id="soundBtn" class="ctrl secondary">🔊 Sound On</button>
+  <button id="repeatBtn" class="ctrl secondary">🗣️ Repeat Question & Choices</button>
+  <button id="chooseLevelBtn" class="ctrl secondary">🗺️ Choose Level</button>
+  <button id="restartBtn" class="ctrl">↻ Restart This Level</button>
+</div>
+<div id="status" class="status">💾 Progress saves automatically on this device</div>
+
+</div>
+
+<div id="overlay" class="overlay" aria-hidden="true">
+  <div class="picker">
     <h2>🗺️ Choose a Weather Level</h2>
-    <p>Pick any level. Completed levels are marked with a check.</p>
+    <p>Jump to any level. Completed levels are marked with a check.</p>
     <div id="levelGrid" class="levelGrid"></div>
-    <button id="closePickerBtn" class="closePicker">Close</button>
-    <button id="clearProgressBtn" class="closePicker secondary">🗑️ Clear Saved Progress</button>
+    <button id="closePickerBtn" class="ctrl close">Close</button>
+    <button id="clearProgressBtn" class="ctrl secondary close">🗑️ Clear Saved Progress</button>
   </div>
 </div>
 
 <script>
-(()=>{const $=id=>document.getElementById(id),game=$('game'),prompt=$('prompt'),lessonTitle=$('lessonTitle'),feedback=$('feedback'),fact=$('fact');const SAVE_KEY='littleBuildersWeatherLabProgressV1';
-let level=0,round=0,stars=0,badges=0,locked=false,soundOn=true;
-let speechOn=true;
-let currentChoiceNames=[];
-let currentForecastNarration='';
+(()=>{
+const $=id=>document.getElementById(id);
+const SAVE_KEY='littleBuildersWeatherLabCleanV1';
+
+const levelNames=['Weather','Dress','Temperature','Precipitation','Tools','Water Cycle','Forecast','Safety'];
+const levelIcons=['☀️','🧥','🌡️','🌧️','🧭','💧','📅','⛈️'];
+const levelDescriptions=[
+ 'Recognize common weather','Choose clothes and gear','Hot, cold, and thermometers',
+ 'Rain, snow, and hail','Meteorologist instruments','Evaporation to precipitation',
+ 'Read a simple forecast','Make safe weather choices'
+];
+
+let level=0, round=0, stars=0, completedLevels=[];
+let soundOn=true, locked=false;
+let currentChoices=[];
+let currentLeadText='';
+let narrationRun=0;
 let preferredVoice=null;
 
-function chooseFriendlyVoice(){
-  if(!('speechSynthesis' in window)) return;
-  const voices=window.speechSynthesis.getVoices();
-  if(!voices.length) return;
-
-  const english=voices.filter(v=>/^en(-|_)/i.test(v.lang));
-  const preferredNames=[
-    'Samantha','Ava','Allison','Susan','Zira','Jenny','Aria',
-    'Google US English','Google UK English Female','Karen','Moira'
-  ];
-
-  preferredVoice=
-    preferredNames.map(name=>english.find(v=>v.name.toLowerCase().includes(name.toLowerCase()))).find(Boolean)
-    || english.find(v=>/female|natural|enhanced|premium/i.test(v.name))
-    || english[0]
-    || voices[0];
+function saveProgress(){
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify({level,round,stars,completedLevels}));
+    $('status').textContent='💾 Progress saved on this device';
+  }catch(e){
+    $('status').textContent='⚠️ Progress saving is unavailable in this browser mode';
+  }
+}
+function loadProgress(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+    if(!s)return;
+    level=Number.isInteger(s.level)?Math.max(0,Math.min(7,s.level)):0;
+    round=Number.isInteger(s.round)?Math.max(0,Math.min(2,s.round)):0;
+    stars=Number.isFinite(s.stars)?Math.max(0,s.stars):0;
+    completedLevels=Array.isArray(s.completedLevels)?s.completedLevels.filter(n=>Number.isInteger(n)&&n>=0&&n<8):[];
+  }catch(e){}
 }
 
+function chooseFriendlyVoice(){
+  if(!('speechSynthesis' in window))return;
+  const voices=speechSynthesis.getVoices();
+  if(!voices.length)return;
+  const eng=voices.filter(v=>/^en(-|_)/i.test(v.lang));
+  const wanted=['Samantha','Ava','Allison','Jenny','Aria','Zira','Susan','Google US English','Karen','Moira'];
+  preferredVoice=wanted.map(n=>eng.find(v=>v.name.toLowerCase().includes(n.toLowerCase()))).find(Boolean)
+    || eng.find(v=>/natural|enhanced|premium/i.test(v.name))
+    || eng[0] || voices[0];
+}
 if('speechSynthesis' in window){
   chooseFriendlyVoice();
-  window.speechSynthesis.onvoiceschanged=chooseFriendlyVoice;
+  speechSynthesis.onvoiceschanged=chooseFriendlyVoice;
 }
 
-function speak(text){
-  if(!speechOn || !text || !('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
+function stopNarration(){
+  narrationRun++;
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+}
+function speakSequence(items,pauseMs=700){
+  if(!soundOn || !('speechSynthesis' in window) || !items.length)return;
+  stopNarration();
   chooseFriendlyVoice();
-
-  const u=new SpeechSynthesisUtterance(text);
-  if(preferredVoice){
-    u.voice=preferredVoice;
-    u.lang=preferredVoice.lang || 'en-US';
-  }else{
-    u.lang='en-US';
-  }
-
-  // Slower, warmer delivery for young children.
-  u.rate=0.84;
-  u.pitch=1.08;
-  u.volume=1;
-  window.speechSynthesis.speak(u);
-}
-
-function speakQuestion(){
-  const questionText=prompt.textContent.trim();
-  const intro=currentForecastNarration ? [currentForecastNarration,questionText] : [questionText];
-  if(currentChoiceNames.length){
-    speakSequence(intro.concat(['Your choices are.']).concat(currentChoiceNames),700);
-  }else{
-    speakSequence(intro,700);
-  }
-}
-
-function speakSequence(items, pauseMs=650){
-  if(!speechOn || !('speechSynthesis' in window) || !items.length) return;
-  window.speechSynthesis.cancel();
-  chooseFriendlyVoice();
-
-  let index=0;
+  const myRun=narrationRun;
+  let i=0;
   function next(){
-    if(index>=items.length) return;
-    const u=new SpeechSynthesisUtterance(items[index]);
-    if(preferredVoice){
-      u.voice=preferredVoice;
-      u.lang=preferredVoice.lang || 'en-US';
-    }else{
-      u.lang='en-US';
-    }
-    u.rate=0.82;
-    u.pitch=1.08;
-    u.volume=1;
+    if(myRun!==narrationRun || i>=items.length)return;
+    const text=String(items[i]||'').trim();
+    if(!text){i++;next();return}
+    const u=new SpeechSynthesisUtterance(text);
+    if(preferredVoice){u.voice=preferredVoice;u.lang=preferredVoice.lang||'en-US'} else u.lang='en-US';
+    u.rate=.83; u.pitch=1.06; u.volume=1;
     u.onend=()=>{
-      index++;
-      if(index<items.length) setTimeout(next,pauseMs);
+      if(myRun!==narrationRun)return;
+      i++;
+      if(i<items.length)setTimeout(next,pauseMs);
     };
-    window.speechSynthesis.speak(u);
+    speechSynthesis.speak(u);
   }
   next();
 }
+function speakCurrent(){
+  const q=$('prompt').textContent.trim();
+  const parts=[];
+  if(currentLeadText)parts.push(currentLeadText);
+  if(q)parts.push(q);
+  if(currentChoices.length){
+    parts.push('Your choices are.');
+    currentChoices.forEach(c=>parts.push(c));
+  }
+  speakSequence(parts,700);
+}
 
-let completedLevels=[];
-
-function loadProgress(){
+function tone(freq=650,d=.12){
+  if(!soundOn)return;
   try{
-    const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
-    if(!saved)return;
-    level=Number.isInteger(saved.level)?Math.max(0,Math.min(7,saved.level)):0;
-    round=Number.isInteger(saved.round)?Math.max(0,Math.min(2,saved.round)):0;
-    stars=Number.isFinite(saved.stars)?Math.max(0,saved.stars):0;
-    badges=Number.isFinite(saved.badges)?Math.max(0,saved.badges):0;
-    completedLevels=Array.isArray(saved.completedLevels)
-      ? saved.completedLevels.filter(n=>Number.isInteger(n)&&n>=0&&n<8)
-      : [];
+    const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.10,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+d);
+    o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+d);
   }catch(e){}
 }
-function saveProgress(){
-  try{
-    localStorage.setItem(SAVE_KEY,JSON.stringify({
-      level,round,stars,badges,completedLevels
-    }));
-    const s=document.getElementById('saveStatus');
-    if(s)s.textContent='💾 Progress saved on this device';
-  }catch(e){
-    const s=document.getElementById('saveStatus');
-    if(s)s.textContent='⚠️ Progress saving is unavailable in this browser mode';
-  }
-}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function lesson(text){const d=document.createElement('div');d.className='lesson';d.innerHTML=text;$('game').appendChild(d)}
+function forecastCard(html){const d=document.createElement('div');d.className='forecastCard';d.innerHTML=html;$('game').appendChild(d)}
 
-const pickerOverlay=document.getElementById('levelPickerOverlay');
-const levelGrid=document.getElementById('levelGrid');
-const chooseLevelBtn=document.getElementById('chooseLevelBtn');
-const readQuestionBtn=document.getElementById('readQuestionBtn');
-const chooseLevelBtnTop=document.getElementById('chooseLevelBtnTop');
-const closePickerBtn=document.getElementById('closePickerBtn');
-const clearProgressBtn=document.getElementById('clearProgressBtn');
-const levelIcons=['☀️','🧥','🌡️','🌧️','🧭','💧','📅','⛈️'];
-const levelDescriptions=[
- 'Recognize common weather',
- 'Choose clothes and gear',
- 'Hot, cold, and thermometers',
- 'Rain, snow, and hail',
- 'Meteorologist instruments',
- 'Evaporation to precipitation',
- 'Read a simple forecast',
- 'Make safe weather choices'
-];
-
-function buildLevelPicker(){
-  levelGrid.innerHTML=names.map((name,i)=>`
-    <button class="levelJump ${completedLevels.includes(i)?'completed':''}" data-level="${i}">
-      <span>${completedLevels.includes(i)?'✅':levelIcons[i]}</span>
-      <b>Level ${i+1}: ${name}</b>
-      <small>${levelDescriptions[i]}</small>
-    </button>`).join('');
-  levelGrid.querySelectorAll('.levelJump').forEach(btn=>{
-    btn.onclick=()=>{
-      level=Number(btn.dataset.level);
-      round=0;
-      locked=false;
-      saveProgress();
-      closeLevelPicker();
-      render();
-    };
-  });
-}
-function openLevelPicker(){buildLevelPicker();pickerOverlay.classList.add('show');pickerOverlay.setAttribute('aria-hidden','false')}
-function closeLevelPicker(){pickerOverlay.classList.remove('show');pickerOverlay.setAttribute('aria-hidden','true')}
-const names=['Weather','Dress','Temperature','Precipitation','Tools','Water Cycle','Forecast','Safety'];
-function sh(a){return [...a].sort(()=>Math.random()-.5)}function tone(f=700,d=.12){if(!soundOn)return;let C=window.AudioContext||window.webkitAudioContext,c=new C,o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.value=.1;o.connect(g).connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.stop(c.currentTime+d)}function top(){
-  badges=completedLevels.length;
+function updateTop(){
   $('stars').textContent=stars;
-  $('badges').textContent=badges;
-  $('fill').style.width=Math.min(100,completedLevels.length/8*100)+'%';
+  $('badges').textContent=completedLevels.length;
   $('levelBadge').textContent=level<8?`Level ${level+1} of 8`:'Adventure Complete';
-  $('map').innerHTML=names.map((n,i)=>`<div class="${completedLevels.includes(i)?'done':i===level?'current':''}">${completedLevels.includes(i)?'✓ ':''}${i+1}. ${n}</div>`).join('')
+  $('progressFill').style.width=(completedLevels.length/8*100)+'%';
+  $('levelMap').innerHTML=levelNames.map((n,i)=>`<div class="${completedLevels.includes(i)?'done':i===level?'current':''}">
+    ${completedLevels.includes(i)?'✓ ':''}${i+1}. ${n}</div>`).join('');
 }
-function lesson(t){game.innerHTML=`<div class="lesson">${t}</div>`}function grid(opts,ans,f){
- let g=document.createElement('div');g.className='grid';
- const shown=sh(opts);
- currentChoiceNames=shown.map(o=>o.l);
- shown.forEach(o=>{
-   let b=document.createElement('div');b.className='choice';
-   b.innerHTML=`<div class="emoji">${o.e}</div><div>${o.l}</div>`;
-   b.onclick=()=>pick(b,o.v===ans,f);
-   g.appendChild(b)
- });
- game.appendChild(g);
 
- // Read the FULL question first. Only after it finishes do we read the choices.
- // This prevents the answer narration from cancelling the last words of the question.
- setTimeout(()=>{
-   const questionText=prompt.textContent.trim();
-   const intro=currentForecastNarration ? [currentForecastNarration,questionText] : [questionText];
-   const narration=intro.concat(['Your choices are.']).concat(currentChoiceNames);
-   speakSequence(narration,700);
- },350);
-}function pick(el,ok,f){if(locked)return;if(ok){locked=true;el.classList.add('correct');stars++;feedback.textContent='Correct! ⭐';speak('That is correct. Great job!');fact.textContent=f;fact.style.display='block';tone(760);setTimeout(()=>{
-  round++;
-  if(round===3){
-    if(!completedLevels.includes(level))completedLevels.push(level);
-    level++;
-    round=0;
-    badges=completedLevels.length;
+function answer(el,correct,factText){
+  if(locked)return;
+  stopNarration();
+  if(correct){
+    locked=true; el.classList.add('correct'); stars++;
+    $('feedback').textContent='Correct! ⭐';
+    $('fact').textContent=factText; $('fact').style.display='block';
+    tone(760,.12);
+    speakSequence(['That is correct. Great job!'],250);
+    setTimeout(()=>{
+      round++;
+      if(round>=3){
+        if(!completedLevels.includes(level))completedLevels.push(level);
+        level++; round=0;
+      }
+      saveProgress(); render();
+    },1300);
+  }else{
+    el.classList.add('wrong'); $('feedback').textContent='Good try — look again.';
+    tone(220,.13); speakSequence(['Good try. Let’s look again.'],250);
+    setTimeout(()=>el.classList.remove('wrong'),350);
   }
-  saveProgress();
-  render()
-},1050)}else{el.classList.add('wrong');feedback.textContent='Good try — look again.';speak('Good try. Let’s look again.');tone(220);setTimeout(()=>el.classList.remove('wrong'),320)}}
-const Q=[
-()=>{lessonTitle.textContent='Weather Explorer';lesson('Weather describes what the <b>air and sky</b> are doing right now.');let q=[['Find rainy weather','rain','Rain is liquid water falling from clouds.'],['Find windy weather','wind','Wind is moving air.'],['Find snowy weather','snow','Snow is made of ice crystals.']][round];prompt.textContent=q[0];grid([{v:'sun',l:'Sunny',e:'☀️'},{v:'rain',l:'Rainy',e:'🌧️'},{v:'wind',l:'Windy',e:'💨'},{v:'snow',l:'Snowy',e:'🌨️'}],q[1],q[2])},
-()=>{lessonTitle.textContent='Weather Ready';lesson('Weather helps us choose what to <b>wear or carry</b>.');let s=[['It is raining. What should you take?','umbrella','An umbrella helps keep rain off you.',[{v:'umbrella',l:'Umbrella',e:'☂️'},{v:'sled',l:'Sled',e:'🛷'},{v:'fan',l:'Fan',e:'🪭'},{v:'sandals',l:'Sandals',e:'🩴'}]],['It is snowy and cold. What should you wear?','coat','A warm coat helps your body keep heat.',[{v:'coat',l:'Warm coat',e:'🧥'},{v:'shorts',l:'Shorts',e:'🩳'},{v:'swim',l:'Swimsuit',e:'🩱'},{v:'shade',l:'Sunglasses',e:'🕶️'}]],['It is sunny and hot. What helps protect you?','hat','A sun hat gives shade from strong sunlight.',[{v:'hat',l:'Sun hat',e:'👒'},{v:'scarf',l:'Scarf',e:'🧣'},{v:'sled',l:'Sled',e:'🛷'},{v:'coat',l:'Heavy coat',e:'🧥'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
-()=>{lessonTitle.textContent='Temperature Scientist';lesson('Temperature tells how <b>hot or cold</b> the air is.');let s=[['Which temperature is colder?','a','32°F is colder than 75°F.',[{v:'a',l:'32°F',e:'❄️'},{v:'b',l:'75°F',e:'🌤️'},{v:'c',l:'90°F',e:'☀️'},{v:'d',l:'100°F',e:'🔥'}]],['Water can freeze near which temperature?','a','Fresh water freezes near 32°F (0°C).',[{v:'a',l:'32°F',e:'🧊'},{v:'b',l:'70°F',e:'🙂'},{v:'c',l:'90°F',e:'☀️'},{v:'d',l:'120°F',e:'🔥'}]],['Which tool measures air temperature?','therm','A thermometer measures temperature.',[{v:'therm',l:'Thermometer',e:'🌡️'},{v:'rain',l:'Rain gauge',e:'🪣'},{v:'wind',l:'Wind vane',e:'🧭'},{v:'clock',l:'Clock',e:'🕒'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
-()=>{lessonTitle.textContent='Precipitation Detective';lesson('<b>Precipitation</b> is water that falls from clouds.');let s=[['Which is liquid precipitation?','rain','Rain is liquid water.',[{v:'rain',l:'Rain',e:'🌧️'},{v:'snow',l:'Snow',e:'❄️'},{v:'hail',l:'Hail',e:'🧊'},{v:'fog',l:'Fog',e:'🌫️'}]],['Which is made of ice crystals?','snow','Snowflakes are ice crystals.',[{v:'snow',l:'Snow',e:'🌨️'},{v:'rain',l:'Rain',e:'🌧️'},{v:'fog',l:'Fog',e:'🌫️'},{v:'dew',l:'Dew',e:'💧'}]],['Which can fall as lumps of ice?','hail','Hail grows inside strong thunderstorm clouds.',[{v:'hail',l:'Hail',e:'🧊'},{v:'rain',l:'Rain',e:'🌧️'},{v:'fog',l:'Fog',e:'🌫️'},{v:'sun',l:'Sunshine',e:'☀️'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
-()=>{lessonTitle.textContent='Meteorologist Tools';lesson('Meteorologists use instruments to <b>measure the atmosphere</b>.');let s=[['Which tool measures rainfall?','g','A rain gauge collects and measures rain.',[{v:'g',l:'Rain gauge',e:'🪣'},{v:'t',l:'Thermometer',e:'🌡️'},{v:'v',l:'Wind vane',e:'🧭'},{v:'r',l:'Ruler',e:'📏'}]],['Which tool shows wind direction?','v','A wind vane shows wind direction.',[{v:'v',l:'Wind vane',e:'🧭'},{v:'g',l:'Rain gauge',e:'🪣'},{v:'t',l:'Thermometer',e:'🌡️'},{v:'c',l:'Clock',e:'🕒'}]],['Which tool measures wind speed?','a','An anemometer measures wind speed.',[{v:'a',l:'Anemometer',e:'🎡'},{v:'t',l:'Thermometer',e:'🌡️'},{v:'g',l:'Rain gauge',e:'🪣'},{v:'r',l:'Ruler',e:'📏'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
-()=>{lessonTitle.textContent='Water Cycle Lab';lesson('Water moves through <b>evaporation → condensation → precipitation → collection</b>.');let s=[['The Sun warms a puddle. What happens next?','e','Evaporation changes liquid water into water vapor.',[{v:'e',l:'Evaporation',e:'💧⬆️'},{v:'f',l:'Freezing',e:'🧊'},{v:'s',l:'Snowfall',e:'🌨️'},{v:'w',l:'Wind',e:'💨'}]],['Water vapor cools and forms clouds. What is this?','c','Condensation forms tiny liquid droplets.',[{v:'c',l:'Condensation',e:'☁️'},{v:'e',l:'Evaporation',e:'💧⬆️'},{v:'m',l:'Melting',e:'🧊➡️💧'},{v:'h',l:'Heating',e:'🔥'}]],['Cloud droplets grow heavy and fall. What is this?','p','Precipitation is water falling from clouds.',[{v:'p',l:'Precipitation',e:'🌧️'},{v:'c',l:'Collection',e:'🏞️'},{v:'e',l:'Evaporation',e:'☀️💧'},{v:'w',l:'Wind',e:'💨'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])},
-()=>{lessonTitle.textContent='Forecast Reader';
-lesson('A <b>forecast</b> uses weather observations and computer models to predict what may happen next.');
-const sets=[
- {forecast:'Tomorrow. Temperature 62 degrees Fahrenheit. Chance of rain 80 percent.',
-  card:'<div class="big">🌧️</div><b>Tomorrow:</b> 62°F &nbsp; • &nbsp; Rain chance: 80%',
-  ask:'What weather is most likely?',ans:'rain',
-  fact:'An 80 percent rain chance means rain is much more likely than a dry day.',
-  opts:[{v:'rain',l:'Rain',e:'🌧️'},{v:'snow',l:'Snow',e:'🌨️'},{v:'sun',l:'Sunny',e:'☀️'},{v:'hot',l:'Very hot',e:'🔥'}]},
- {forecast:'This afternoon. Temperature 91 degrees Fahrenheit. Chance of rain 5 percent.',
-  card:'<div class="big">☀️</div><b>Afternoon:</b> 91°F &nbsp; • &nbsp; Rain chance: 5%',
-  ask:'Which description fits best?',ans:'hotdry',
-  fact:'91 degrees is hot, and a 5 percent rain chance means rain is unlikely.',
-  opts:[{v:'hotdry',l:'Hot and mostly dry',e:'☀️'},{v:'snow',l:'Cold and snowy',e:'❄️'},{v:'storm',l:'Stormy',e:'⛈️'},{v:'freeze',l:'Freezing',e:'🧊'}]},
- {forecast:'This morning. Temperature 55 degrees Fahrenheit. Wind speed 25 miles per hour.',
-  card:'<div class="big">💨</div><b>Morning:</b> 55°F &nbsp; • &nbsp; Wind: 25 mph',
-  ask:'What should you notice most?',ans:'windy',
-  fact:'25 mile per hour wind is noticeably windy, even when the temperature is mild.',
-  opts:[{v:'windy',l:'It will be windy',e:'💨'},{v:'snow',l:'Heavy snow',e:'🌨️'},{v:'heat',l:'Extreme heat',e:'🔥'},{v:'calm',l:'No wind',e:'🍃'}]}
+}
+
+function grid(options,answerValue,factText){
+  const shown=shuffle(options);
+  currentChoices=shown.map(o=>o.label);
+  const g=document.createElement('div');g.className='grid';
+  shown.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='choice'; b.type='button';
+    b.innerHTML=`<div class="emoji">${o.emoji}</div><div>${o.label}</div>`;
+    b.onclick=()=>answer(b,o.value===answerValue,factText);
+    g.appendChild(b);
+  });
+  $('game').appendChild(g);
+  setTimeout(speakCurrent,400);
+}
+
+const levels=[
+  ()=> {
+    $('lessonTitle').textContent='Weather Explorer';
+    lesson('Weather describes what the <b>air and sky</b> are doing right now.');
+    const s=[
+      {q:'Find the rainy weather.',a:'rain',f:'Rain is liquid water falling from clouds.'},
+      {q:'Find the windy weather.',a:'wind',f:'Wind is moving air.'},
+      {q:'Find the snowy weather.',a:'snow',f:'Snow is made of ice crystals.'}
+    ][round];
+    $('prompt').textContent=s.q;
+    grid([
+      {value:'sun',label:'Sunny',emoji:'☀️'},
+      {value:'rain',label:'Rainy',emoji:'🌧️'},
+      {value:'wind',label:'Windy',emoji:'💨'},
+      {value:'snow',label:'Snowy',emoji:'🌨️'}
+    ],s.a,s.f);
+  },
+
+  ()=> {
+    $('lessonTitle').textContent='Weather Ready';
+    lesson('Weather can help us choose what to <b>wear or carry</b>.');
+    const sets=[
+      {q:'It is raining. What should you take?',a:'umbrella',f:'An umbrella helps keep rain off you.',
+       o:[['umbrella','Umbrella','☂️'],['sled','Sled','🛷'],['fan','Fan','🪭'],['sandals','Sandals','🩴']]},
+      {q:'It is snowy and cold. What should you wear?',a:'coat',f:'A warm coat helps your body keep heat.',
+       o:[['coat','Warm coat','🧥'],['shorts','Shorts','🩳'],['swim','Swimsuit','🩱'],['glasses','Sunglasses','🕶️']]},
+      {q:'It is sunny and hot. What helps protect you?',a:'hat',f:'A sun hat helps shade your face from strong sunlight.',
+       o:[['hat','Sun hat','👒'],['scarf','Winter scarf','🧣'],['sled','Sled','🛷'],['coat','Heavy coat','🧥']]}
+    ];
+    const s=sets[round]; $('prompt').textContent=s.q;
+    grid(s.o.map(x=>({value:x[0],label:x[1],emoji:x[2]})),s.a,s.f);
+  },
+
+  ()=> {
+    $('lessonTitle').textContent='Temperature Scientist';
+    lesson('Temperature tells us how <b>hot or cold</b> the air is.');
+    const sets=[
+      {q:'Which temperature is colder?',a:'cold',f:'32 degrees Fahrenheit is colder than 75 degrees Fahrenheit.',
+       o:[['cold','32°F','❄️'],['warm','75°F','🌤️'],['hot','90°F','☀️'],['hotter','100°F','🔥']]},
+      {q:'Water can freeze near which temperature?',a:'freeze',f:'Fresh water freezes near 32 degrees Fahrenheit, or 0 degrees Celsius.',
+       o:[['freeze','32°F','🧊'],['warm','70°F','🙂'],['hot','90°F','☀️'],['hotter','120°F','🔥']]},
+      {q:'Which tool measures air temperature?',a:'therm',f:'A thermometer measures temperature.',
+       o:[['therm','Thermometer','🌡️'],['rain','Rain gauge','🪣'],['wind','Wind vane','🧭'],['clock','Clock','🕒']]}
+    ];
+    const s=sets[round]; $('prompt').textContent=s.q;
+    grid(s.o.map(x=>({value:x[0],label:x[1],emoji:x[2]})),s.a,s.f);
+  },
+
+  ()=> {
+    $('lessonTitle').textContent='Precipitation Detective';
+    lesson('<b>Precipitation</b> is water that falls from clouds.');
+    const sets=[
+      {q:'Which is liquid precipitation?',a:'rain',f:'Rain is liquid water falling from clouds.',
+       o:[['rain','Rain','🌧️'],['snow','Snow','❄️'],['hail','Hail','🧊'],['cloud','Cloud','☁️']]},
+      {q:'Which precipitation is made of ice crystals?',a:'snow',f:'Snowflakes are ice crystals that form in cold clouds.',
+       o:[['snow','Snow','🌨️'],['rain','Rain','🌧️'],['fog','Fog','🌫️'],['dew','Dew','💧']]},
+      {q:'Which can fall as balls or lumps of ice?',a:'hail',f:'Hailstones grow inside strong thunderstorm clouds.',
+       o:[['hail','Hail','🧊'],['rain','Rain','🌧️'],['fog','Fog','🌫️'],['sun','Sunshine','☀️']]}
+    ];
+    const s=sets[round]; $('prompt').textContent=s.q;
+    grid(s.o.map(x=>({value:x[0],label:x[1],emoji:x[2]})),s.a,s.f);
+  },
+
+  ()=> {
+    $('lessonTitle').textContent='Meteorologist Tools';
+    lesson('Meteorologists use instruments to <b>measure the atmosphere</b>.');
+    const sets=[
+      {q:'Which tool measures rainfall?',a:'gauge',f:'A rain gauge collects and measures rain.',
+       o:[['gauge','Rain gauge','🪣'],['therm','Thermometer','🌡️'],['vane','Wind vane','🧭'],['glass','Magnifying glass','🔎']]},
+      {q:'Which tool shows wind direction?',a:'vane',f:'A wind vane shows the direction the wind comes from.',
+       o:[['vane','Wind vane','🧭'],['gauge','Rain gauge','🪣'],['therm','Thermometer','🌡️'],['ruler','Ruler','📏']]},
+      {q:'Which tool measures wind speed?',a:'anem',f:'An anemometer spins faster when the wind blows faster.',
+       o:[['anem','Anemometer','🎡'],['therm','Thermometer','🌡️'],['gauge','Rain gauge','🪣'],['clock','Clock','🕒']]}
+    ];
+    const s=sets[round]; $('prompt').textContent=s.q;
+    grid(s.o.map(x=>({value:x[0],label:x[1],emoji:x[2]})),s.a,s.f);
+  },
+
+  ()=> {
+    $('lessonTitle').textContent='Water Cycle Lab';
+    lesson('Water moves in a cycle: <b>evaporation → condensation → precipitation → collection</b>.');
+    const sets=[
+      {q:'The Sun warms a puddle. What happens next?',a:'evap',f:'Evaporation changes liquid water into water vapor that rises.',
+       o:[['evap','Evaporation','💧⬆️'],['freeze','Freezing','🧊'],['snow','Snowfall','🌨️'],['wind','Wind','💨']]},
+      {q:'Water vapor cools and forms clouds. What is this called?',a:'cond',f:'Condensation changes water vapor into tiny liquid droplets.',
+       o:[['cond','Condensation','☁️'],['evap','Evaporation','💧⬆️'],['melt','Melting','🧊➡️💧'],['heat','Heating','🔥']]},
+      {q:'Cloud droplets grow heavy and fall. What is this?',a:'precip',f:'Precipitation is water falling from clouds.',
+       o:[['precip','Precipitation','🌧️'],['collect','Collection','🏞️'],['evap','Evaporation','☀️💧'],['wind','Wind','💨']]}
+    ];
+    const s=sets[round]; $('prompt').textContent=s.q;
+    grid(s.o.map(x=>({value:x[0],label:x[1],emoji:x[2]})),s.a,s.f);
+  },
+
+  ()=> {
+    $('lessonTitle').textContent='Forecast Reader';
+    lesson('A <b>forecast</b> predicts what the weather may be like later.');
+    const sets=[
+      {
+        lead:'Tomorrow’s forecast. Temperature: 62 degrees Fahrenheit. Chance of rain: 80 percent.',
+        card:'<div class="big">🌧️</div><b>Tomorrow:</b> 62°F &nbsp; • &nbsp; Rain chance: 80%',
+        q:'What weather is most likely?',a:'rain',
+        f:'An 80 percent chance of rain means rain is much more likely than a dry day.',
+        o:[['rain','Rain','🌧️'],['snow','Snow','🌨️'],['sun','Sunny','☀️'],['hot','Very hot','🔥']]
+      },
+      {
+        lead:'This afternoon’s forecast. Temperature: 91 degrees Fahrenheit. Chance of rain: 5 percent.',
+        card:'<div class="big">☀️</div><b>Afternoon:</b> 91°F &nbsp; • &nbsp; Rain chance: 5%',
+        q:'Which description fits best?',a:'hotdry',
+        f:'91 degrees is hot, and a 5 percent chance of rain means rain is unlikely.',
+        o:[['hotdry','Hot and mostly dry','☀️'],['snow','Cold and snowy','❄️'],['storm','Stormy','⛈️'],['freeze','Freezing','🧊']]
+      },
+      {
+        lead:'This morning’s forecast. Temperature: 55 degrees Fahrenheit. Wind speed: 25 miles per hour.',
+        card:'<div class="big">💨</div><b>Morning:</b> 55°F &nbsp; • &nbsp; Wind: 25 mph',
+        q:'What should you notice most?',a:'windy',
+        f:'25 mile-per-hour wind is noticeably windy, even when the temperature is mild.',
+        o:[['windy','It will be windy','💨'],['snow','Heavy snow','🌨️'],['heat','Extreme heat','🔥'],['calm','No wind','🍃']]
+      }
+    ];
+    const s=sets[round];
+    currentLeadText=s.lead;
+    forecastCard(s.card);
+    $('prompt').textContent=s.q;
+    grid(s.o.map(x=>({value:x[0],label:x[1],emoji:x[2]})),s.a,s.f);
+  },
+
+  ()=> {
+    $('lessonTitle').textContent='Weather Safety Challenge';
+    lesson('Weather science helps us make <b>safe choices</b>.');
+    const sets=[
+      {q:'You hear thunder outside. What is safest?',a:'inside',f:'Thunder means lightning is close enough to be dangerous. Go indoors.',
+       o:[['inside','Go indoors','🏠'],['tree','Stand under a tree','🌳'],['field','Stay in an open field','🏃'],['water','Go swimming','🏊']]},
+      {q:'A tornado warning is issued. Where should you go?',a:'shelter',f:'Use a sturdy building and a small interior room on the lowest level.',
+       o:[['shelter','Interior room downstairs','🏠'],['window','Next to a window','🪟'],['outside','Outside to watch','👀'],['car','Outside by a car','🚗']]},
+      {q:'It is extremely hot outside. What is a smart choice?',a:'water',f:'Drink water and take breaks in shade or air conditioning.',
+       o:[['water','Drink water and cool down','💧'],['coat','Wear a heavy coat','🧥'],['run','Run hard at noon','🏃'],['ignore','Ignore feeling overheated','🙈']]}
+    ];
+    const s=sets[round]; $('prompt').textContent=s.q;
+    grid(s.o.map(x=>({value:x[0],label:x[1],emoji:x[2]})),s.a,s.f);
+  }
 ];
-const s=sets[round];
-card(s.card);
-prompt.textContent=s.ask;
-currentForecastNarration=s.forecast;
-grid(s.opts,s.ans,s.fact)
-}{v:'snow',l:'Snow',e:'🌨️'},{v:'sun',l:'Sunny',e:'☀️'},{v:'hot',l:'Very hot',e:'🔥'}]],['<b>Afternoon:</b> 91°F • Rain chance: 5%','Which description fits best?','hot','91°F is hot, and rain is unlikely at 5%.',[{v:'hot',l:'Hot & mostly dry',e:'☀️'},{v:'snow',l:'Cold & snowy',e:'❄️'},{v:'storm',l:'Stormy',e:'⛈️'},{v:'freeze',l:'Freezing',e:'🧊'}]],['<b>Morning:</b> 55°F • Wind: 25 mph','What should you notice most?','wind','25 mph means it will feel noticeably windy.',[{v:'wind',l:'It will be windy',e:'💨'},{v:'snow',l:'Heavy snow',e:'🌨️'},{v:'heat',l:'Extreme heat',e:'🔥'},{v:'calm',l:'No wind',e:'🍃'}]]][round];prompt.textContent=s[1];game.innerHTML=`<div class="lesson">A forecast uses observations and models to predict weather.</div><div class="forecast">${s[0]}</div>`;grid(s[4],s[2],s[3])},
-()=>{lessonTitle.textContent='Weather Safety Challenge';lesson('Weather science helps us make <b>safe choices</b>.');let s=[['You hear thunder outside. What is safest?','in','Thunder means lightning is close enough to be dangerous. Go indoors.',[{v:'in',l:'Go indoors',e:'🏠'},{v:'tree',l:'Stand under a tree',e:'🌳'},{v:'field',l:'Stay in a field',e:'🏃'},{v:'swim',l:'Go swimming',e:'🏊'}]],['A tornado warning is issued. Where should you go?','safe','Use a sturdy building and a small interior room on the lowest level.',[{v:'safe',l:'Interior room downstairs',e:'🏠'},{v:'window',l:'Next to a window',e:'🪟'},{v:'outside',l:'Outside to watch',e:'👀'},{v:'yard',l:'Stand in the yard',e:'🌳'}]],['It is extremely hot outside. What is smart?','water','Drink water and take breaks in shade or air conditioning.',[{v:'water',l:'Drink water & cool down',e:'💧'},{v:'coat',l:'Wear a heavy coat',e:'🧥'},{v:'run',l:'Run hard at noon',e:'🏃'},{v:'ignore',l:'Ignore overheating',e:'🙈'}]]][round];prompt.textContent=s[0];grid(s[3],s[1],s[2])}
-];
-function render(){locked=false;currentChoiceNames=[];currentForecastNarration='';game.innerHTML='';feedback.textContent='';fact.style.display='none';top();if(level>=8){$('fill').style.width='100%';lessonTitle.textContent='Junior Meteorologist';prompt.textContent='Weather Adventure Complete!';game.innerHTML=`<div class="finish"><div class="hero">🏆🌦️</div><h2>You did it!</h2><div class="cert"><h3>Junior Meteorologist Certificate</h3><p>You completed all 8 Weather Lab levels.</p><p><b>${stars} stars • ${badges} badges</b></p><p>You learned weather types, temperature, precipitation, instruments, the water cycle, forecasts, and safety.</p></div><button onclick="location.reload()">Play Again</button></div>`;feedback.textContent='Excellent weather science!';speak('Excellent weather science! You are a junior meteorologist!');return}Q[level]()}
-$('restartBtn').onclick=()=>{round=0;locked=false;saveProgress();render()};
+
+function render(){
+  stopNarration();
+  locked=false; currentChoices=[]; currentLeadText='';
+  $('game').innerHTML=''; $('feedback').textContent=''; $('fact').style.display='none';
+  updateTop();
+
+  if(level>=8){
+    $('progressFill').style.width='100%';
+    $('lessonTitle').textContent='Junior Meteorologist';
+    $('prompt').textContent='Weather Adventure Complete!';
+    $('game').innerHTML=`<div class="finish"><div class="hero">🏆🌈</div><h2>You did it!</h2>
+      <div class="cert"><h3>Junior Meteorologist Certificate</h3>
+      <p>You completed all 8 Weather Lab levels.</p>
+      <p><b>${stars} stars • ${completedLevels.length} badges</b></p>
+      <p>You learned weather types, temperature, precipitation, instruments, the water cycle, forecasts, and weather safety.</p></div>
+      <button class="ctrl" onclick="location.reload()">Play Again</button></div>`;
+    $('feedback').textContent='Excellent weather science!';
+    speakSequence(['Excellent weather science. You are a junior meteorologist!'],300);
+    return;
+  }
+  levels[level]();
+}
+
+function buildPicker(){
+  $('levelGrid').innerHTML=levelNames.map((n,i)=>`<button class="levelJump ${completedLevels.includes(i)?'completed':''}" data-level="${i}">
+    <span>${completedLevels.includes(i)?'✅':levelIcons[i]}</span>
+    <b>Level ${i+1}: ${n}</b>
+    <small>${levelDescriptions[i]}</small>
+  </button>`).join('');
+  $('levelGrid').querySelectorAll('.levelJump').forEach(b=>{
+    b.onclick=()=>{
+      level=Number(b.dataset.level);round=0;saveProgress();closePicker();render();
+    }
+  })
+}
+function openPicker(){buildPicker();$('overlay').classList.add('show');$('overlay').setAttribute('aria-hidden','false')}
+function closePicker(){$('overlay').classList.remove('show');$('overlay').setAttribute('aria-hidden','true')}
+
+$('chooseLevelBtn').onclick=openPicker;
+$('chooseLevelBtnTop').onclick=openPicker;
+$('closePickerBtn').onclick=closePicker;
+$('overlay').onclick=e=>{if(e.target===$('overlay'))closePicker()};
+$('restartBtn').onclick=()=>{round=0;saveProgress();render()};
+$('repeatBtn').onclick=speakCurrent;
 $('soundBtn').onclick=()=>{
   soundOn=!soundOn;
-  speechOn=soundOn;
-  if(!soundOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-  $('soundBtn').textContent=soundOn?'🔊 Sound On':'🔇 Sound Off'
+  if(!soundOn)stopNarration();
+  $('soundBtn').textContent=soundOn?'🔊 Sound On':'🔇 Sound Off';
 };
-readQuestionBtn.onclick=speakQuestion;
-chooseLevelBtn.onclick=openLevelPicker;
-chooseLevelBtnTop.onclick=openLevelPicker;
-closePickerBtn.onclick=closeLevelPicker;
-pickerOverlay.onclick=e=>{if(e.target===pickerOverlay)closeLevelPicker()};
-clearProgressBtn.onclick=()=>{
+$('clearProgressBtn').onclick=()=>{
   if(confirm('Clear all saved Weather Lab progress on this device?')){
     localStorage.removeItem(SAVE_KEY);
-    level=0;round=0;stars=0;badges=0;completedLevels=[];
-    closeLevelPicker();
-    render();
-    $('saveStatus').textContent='Saved progress cleared';
+    level=0;round=0;stars=0;completedLevels=[];
+    closePicker();render();$('status').textContent='Saved progress cleared';
   }
 };
 window.addEventListener('pagehide',saveProgress);
+
 loadProgress();
-render()})();
-</script></body></html>
+render();
+})();
+</script>
+</body>
+</html>
